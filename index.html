@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MTG Data.com</title>
+    <link rel="icon" href="logo.png" type="image/png">
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- SurveyJS Library and Theme -->
+    <link href="https://unpkg.com/survey-core@1.9.123/defaultV2.min.css" type="text/css" rel="stylesheet">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* Custom styles to match the design */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom styles for SurveyJS to better match the theme */
+        .sv-root-modern {
+            border: none;
+            background-color: #ffffff;
+            border-radius: 0.5rem;
+            --sjs-primary-backcolor: #60a5fa;
+            --sjs-primary-backcolor-dark: #3b82f6;
+            --sjs-primary-forecolor: #ffffff;
+        }
+        .sv-question__title {
+            font-weight: 600;
+        }
+        /* Style for disabled survey */
+        #surveyContainer.disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 flex flex-col min-h-screen">
+
+    <!-- Header Section -->
+    <header class="bg-white shadow-sm flex-shrink-0">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <a href="./index.html" class="flex items-center gap-3">
+                  <img src="Logo.png" alt="MTG Data Logo" class="h-10 w-auto">
+                  <span class="text-2xl font-bold text-gray-900">MTG Data.com</span>
+                </a>
+                <nav class="flex items-center gap-6">
+                    <a href="./Rating Guide.html" class="text-lg font-medium text-gray-600 hover:text-gray-900">Rating Guide</a>
+                    <a href="./about.html" class="text-lg font-medium text-gray-600 hover:text-gray-900">About</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+            <!-- Left Column: Card Image and Sign In -->
+            <div class="lg:col-span-4 space-y-6">
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h2 id="card-name-title" class="text-xl font-semibold mb-4">Card: Please Sign In</h2>
+                    <img id="card-image" src="https://placehold.co/320x450/cccccc/000000?text=Waiting+for+User" 
+                         alt="Magic: The Gathering Card" 
+                         class="w-full rounded-lg shadow-md"
+                         onerror="this.onerror=null;this.src='https://placehold.co/320x450/cccccc/000000?text=Image+Not+Found';">
+                </div>
+                
+                <div id="auth-section" class="bg-white p-6 rounded-lg shadow">
+                    <!-- This section will be dynamically populated by JavaScript -->
+                </div>
+
+                <div class="bg-white p-6 rounded-lg shadow text-center">
+                    <p class="text-lg font-medium">Ratings Completed: <span id="ratings-completed-count" class="font-bold text-blue-600">0</span></p>
+                </div>
+            </div>
+
+            <!-- Right Column: Survey Form -->
+            <div class="lg:col-span-8">
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h2 class="text-2xl font-bold mb-4">Form</h2>
+                    <div id="surveyContainer" class="disabled">
+                        <!-- SurveyJS will be rendered here -->
+                    </div>
+                    <div id="survey-overlay" class="text-center py-10">
+                        <p class="text-gray-500">Please sign in to begin rating cards.</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+    
+    <!-- JQuery (required for SurveyJS) -->
+    <script src="https://unpkg.com/jquery"></script>
+    <!-- SurveyJS Library -->
+    <script src="https://unpkg.com/survey-jquery@1.9.123/survey.jquery.min.js"></script>
+    
+    <script>
+        // Ensure the DOM is fully loaded before running scripts
+        $(document).ready(function() {
+            // --- Configuration ---
+            // This now points to your live AWS Elastic Beanstalk environment.
+            const API_BASE_URL = 'http://MTGData.us-west-2.elasticbeanstalk.com/api';
+
+            // --- State Management ---
+            let state = {
+                userId: null,
+                userEmail: null,
+                currentCard: null, // { id, name, image_uri }
+            };
+
+            // --- UI Elements ---
+            const authSection = $('#auth-section');
+            const cardNameTitle = $('#card-name-title');
+            const cardImage = $('#card-image');
+            const ratingsCount = $('#ratings-completed-count');
+            const surveyContainer = $('#surveyContainer');
+            const surveyOverlay = $('#survey-overlay');
+
+            // --- SurveyJS Model ---
+            const surveyJson = {
+                pages: [{
+                    elements: [
+                        { type: 'rating', name: 'power', title: 'On a scale from 1 to 10, how powerful is this card?', minRateDescription: 'Weak', maxRateDescription: 'Broken', rateMax: 10, isRequired: true },
+                        { type: 'rating', name: 'preference', title: 'On a scale from 1 to 5, how much do you like this card?', minRateDescription: 'Strongly Dislike', maxRateDescription: 'Strongly Like', rateMax: 5, isRequired: true },
+                        { type: 'radiogroup', name: 'standard', title: 'How would you describe this card in Standard?', choices: ['Unplayable', 'Playable', 'Broken'], colCount: 3, isRequired: true },
+                        { type: 'radiogroup', name: 'commander', title: 'How would you describe this card in Commander?', choices: ['Unplayable', 'Playable', 'Broken'], colCount: 3, isRequired: true },
+                        { type: 'radiogroup', name: 'crossplay', title: 'Do you think this card could see play outside of Standard and Commander?', choices: ['Probably', 'Probably Not'], isRequired: true },
+                        { type: 'boolean', name: 'sideboard', title: 'Is this card meant for the sideboard?', labelTrue: 'No', labelFalse: 'Yes', renderAs: 'radio', isRequired: true },
+                        { type: 'rating', name: 'flexibility', title: 'On a scale from 1 to 5, how many deck archetypes could effectively use this card?', minRateDescription: 'Very few decks', maxRateDescription: 'Almost all decks', rateMax: 5, isRequired: true }
+                    ]
+                }],
+                showQuestionNumbers: 'off',
+                pageNextText: 'Submit >>',
+                completeText: 'Submit >>',
+                showCompletedPage: false
+            };
+
+            const survey = new Survey.Model(surveyJson);
+            Survey.StylesManager.applyTheme("defaultV2");
+            surveyContainer.Survey({ model: survey });
+
+            // --- API Functions ---
+            async function apiRequest(endpoint, method = 'GET', body = null) {
+                try {
+                    const options = {
+                        method,
+                        headers: { 'Content-Type': 'application/json' },
+                    };
+                    if (body) {
+                        options.body = JSON.stringify(body);
+                    }
+                    const response = await fetch(`${API_BASE_URL}${endpoint}`, options);
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || `HTTP error! Status: ${response.status}`);
+                    }
+                    return await response.json();
+                } catch (error) {
+                    console.error(`API Error on ${method} ${endpoint}:`, error);
+                    alert(`An error occurred: ${error.message}`);
+                    throw error;
+                }
+            }
+
+            // --- Core Application Logic ---
+            
+            function updateCardUI(card) {
+                state.currentCard = card;
+                cardNameTitle.text(`Card: ${card.name}`);
+                cardImage.attr('src', card.image_uri);
+            }
+
+            async function fetchNextCard() {
+                if (!state.userId) return;
+                try {
+                    const card = await apiRequest(`/card?userId=${state.userId}`);
+                    updateCardUI(card);
+                    survey.clear(); // Clear previous answers
+                    survey.render();
+                } catch (error) {
+                    cardNameTitle.text('Error fetching card');
+                    cardImage.attr('src', 'https://placehold.co/320x450/ff0000/ffffff?text=Error!');
+                }
+            }
+
+            async function updateProgress() {
+                if (!state.userId) return;
+                try {
+                    const progress = await apiRequest(`/progress?userId=${state.userId}`);
+                    ratingsCount.text(progress.ratingsCompleted);
+                } catch (error) {
+                    ratingsCount.text('Error');
+                }
+            }
+
+            async function handleLogin(email) {
+                try {
+                    const loginData = await apiRequest('/login', 'POST', { email });
+                    state.userId = loginData.userId;
+                    state.userEmail = loginData.email;
+                    
+                    // Persist session in localStorage
+                    localStorage.setItem('mtgUser', JSON.stringify({ id: state.userId, email: state.userEmail }));
+
+                    renderLoggedInUI();
+                    await updateProgress();
+                    await fetchNextCard();
+                } catch (error) {
+                    renderLoggedOutUI(); // Revert to login form on failure
+                }
+            }
+
+            function handleLogout() {
+                state.userId = null;
+                state.userEmail = null;
+                state.currentCard = null;
+                localStorage.removeItem('mtgUser');
+                renderLoggedOutUI();
+                cardNameTitle.text('Card: Please Sign In');
+                cardImage.attr('src', 'https://placehold.co/320x450/cccccc/000000?text=Waiting+for+User');
+                ratingsCount.text('0');
+            }
+
+            // --- UI Rendering ---
+
+            function renderLoggedOutUI() {
+                authSection.html(`
+                    <h3 class="text-lg font-medium text-gray-900">Sign In to Start</h3>
+                    <p class="text-sm text-gray-500 mt-1 mb-4">Use your email to save progress and get rewards.</p>
+                    <form id="login-form">
+                        <div class="space-y-3">
+                            <input id="email-input" type="email" placeholder="Tarmogoyf@gmail.com" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" required>
+                            <button id="sign-in-btn" type="submit" class="w-full bg-blue-400 text-white font-semibold py-2 px-4 rounded-md hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition">
+                                Sign In / Register
+                            </button>
+                        </div>
+                    </form>
+                `);
+                surveyContainer.addClass('disabled');
+                surveyOverlay.show();
+            }
+
+            function renderLoggedInUI() {
+                authSection.html(`
+                    <h3 class="text-lg font-medium text-gray-900">Signed In</h3>
+                    <p class="text-sm text-gray-500 mt-1 mb-4">Welcome back, <span class="font-semibold">${state.userEmail}</span>!</p>
+                    <button id="sign-out-btn" class="w-full bg-red-400 text-white font-semibold py-2 px-4 rounded-md hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition">
+                        Sign Out
+                    </button>
+                `);
+                surveyContainer.removeClass('disabled');
+                surveyOverlay.hide();
+            }
+
+            // --- Event Handlers ---
+            
+            // Handle Login Form Submission
+            authSection.on('submit', '#login-form', function(e) {
+                e.preventDefault();
+                const email = $('#email-input').val();
+                if (email) {
+                    $('#sign-in-btn').text('Signing in...').prop('disabled', true);
+                    handleLogin(email);
+                }
+            });
+
+            // Handle Logout
+            authSection.on('click', '#sign-out-btn', handleLogout);
+
+            // Handle Survey Completion
+            survey.onComplete.add(async function (sender) {
+                if (!state.userId || !state.currentCard) {
+                    alert("You must be signed in and have a card loaded to submit a rating.");
+                    return;
+                }
+                const payload = {
+                    userId: state.userId,
+                    cardId: state.currentCard.id,
+                    cardName: state.currentCard.name,
+                    data: sender.data,
+                };
+                
+                try {
+                    await apiRequest('/rate', 'POST', payload);
+                    // On success, update progress and get the next card
+                    await updateProgress();
+                    await fetchNextCard();
+                } catch (error) {
+                    // Error is already alerted in apiRequest
+                }
+            });
+
+            // --- Initialization ---
+            function initialize() {
+                const storedUser = localStorage.getItem('mtgUser');
+                if (storedUser) {
+                    const user = JSON.parse(storedUser);
+                    state.userId = user.id;
+                    state.userEmail = user.email;
+                    renderLoggedInUI();
+                    updateProgress();
+                    fetchNextCard();
+                } else {
+                    renderLoggedOutUI();
+                }
+            }
+
+            initialize();
+        });
+    </script>
+
+</body>
+</html>

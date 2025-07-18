@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rating Guide - MTG Data.com</title>
+    <link rel="icon" href="logo.png" type="image/png">
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* Base body font */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 flex flex-col min-h-screen">
+
+    <!-- Header Section (Copied from index.html) -->
+    <header class="bg-white shadow-sm flex-shrink-0">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                    <a href="./index.html" class="flex items-center gap-3">
+                      <img src="Logo.png" alt="MTG Data Logo" class="h-10 w-auto">
+                      <span class="text-2xl font-bold text-gray-900">MTG Data.com</span>
+                    </a>
+                    <!-- Added a class to highlight the current page -->
+                    <a href="#" class="text-lg font-bold text-blue-600" aria-current="page">Rating Guide</a>
+                    <a href="#" class="text-lg font-medium text-gray-600 hover:text-gray-900">About</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow">
+        <!-- Replaced Carbon classes with Tailwind CSS for consistent styling -->
+        <div class="bg-white p-8 rounded-lg shadow-md max-w-4xl mx-auto">
+            <h1 class="text-3xl font-bold mb-4">Rating Guide</h1>
+            <p class="text-lg text-gray-600 mb-8">Use this guide to rate Magic: The Gathering cards clearly and consistently.</p>
+
+            <!-- Section 1: Power Level -->
+            <div class="mb-8">
+                <h2 class="text-2xl font-semibold mb-3 pb-2 border-b">1. Power Level</h2>
+                <p class="text-gray-500 italic mb-2">Q: On a scale from 1 (Weak) to 10 (Broken), how powerful is this card?</p>
+                <p class="text-gray-700">Evaluate based on raw power and its effect relative to its casting cost. The exact baseline isn't important, just be consistent in your ratings.</p>
+            </div>
+
+            <!-- Section 2: Personal Preference -->
+            <div class="mb-8">
+                <h2 class="text-2xl font-semibold mb-3 pb-2 border-b">2. Personal Preference</h2>
+                <p class="text-gray-500 italic mb-2">Q: On a scale from 1 (Strongly Dislike) to 5 (Strongly Like), how much do you like this card?</p>
+                <p class="text-gray-700">This rating is based purely on your personal preference.</p>
+            </div>
+
+            <!-- Section 3: Standard Playability -->
+            <div class="mb-8">
+                <h2 class="text-2xl font-semibold mb-3 pb-2 border-b">3. Standard Playability</h2>
+                <p class="text-gray-500 italic mb-2">Q: How would you classify this card in Standard?</p>
+                <ul class="list-disc list-inside space-y-2 text-gray-700">
+                    <li><strong>Unplayable:</strong> Unlikely to appear in competitive decks.</li>
+                    <li><strong>Playable:</strong> Has a realistic chance of appearing in 5-0 MTG Arena or MTGO decklists.</li>
+                    <li><strong>Broken:</strong> Format-warping (negatively impacting the meta), likely to be banned, or significantly above average for its rarity or casting cost.</li>
+                </ul>
+            </div>
+
+            <!-- Section 4: Commander Playability -->
+            <div class="mb-8">
+                <h2 class="text-2xl font-semibold mb-3 pb-2 border-b">4. Commander Playability</h2>
+                <p class="text-gray-500 italic mb-2">Q: How would you classify this card in Commander?</p>
+                <ul class="list-disc list-inside space-y-2 text-gray-700">
+                    <li><strong>Unplayable:</strong> Does not fit effectively in any competitive or popular Commander deck.</li>
+                    <li><strong>Playable:</strong> Could realistically fit into decks ranked at a Bracket level 3 or higher, providing competitive benefits.</li>
+                    <li><strong>Broken:</strong> Could end up on the game changers list, ban-worthy, or creates an unfun environment due to high power.</li>
+                </ul>
+            </div>
+
+            <!-- Section 5: Other Formats -->
+            <div class="mb-8">
+                <h2 class="text-2xl font-semibold mb-3 pb-2 border-b">5. Playability in Other Formats</h2>
+                <p class="text-gray-500 italic mb-2">Q: Could this card see play outside of Standard and Commander?</p>
+                <ul class="list-disc list-inside space-y-2 text-gray-700">
+                    <li><strong>Probably Not:</strong> Unlikely to appear in any competive Vintage, Legacy, Modern, or Pioneer MTGO decklists.</li>
+                    <li><strong>Probably:</strong> Has a reasonable chance to appear in competitive MTGO decklists for Vintage, Legacy, Modern, or Pioneer. (Excludes Pauper and Penny Dreadful.)</li>
+                </ul>
+            </div>
+
+            <!-- Section 6: Sideboard -->
+            <div class="mb-8">
+                <h2 class="text-2xl font-semibold mb-3 pb-2 border-b">6. Sideboard Inclusion</h2>
+                <p class="text-gray-500 italic mb-2">Q: Is this card intended primarily for the sideboard?</p>
+                <ul class="list-disc list-inside space-y-2 text-gray-700">
+                    <li><strong>Yes:</strong> Typically appears more often in sideboards than main decks.</li>
+                    <li><strong>No:</strong> Typically used in main decks.</li>
+                </ul>
+            </div>
+
+            <!-- Section 7: Versatility -->
+            <div>
+                <h2 class="text-2xl font-semibold mb-3 pb-2 border-b">7. Deck Archetype Versatility</h2>
+                <p class="text-gray-500 italic mb-2">Q: On a scale from 1 (Very Few Decks) to 5 (Almost All Decks), how many archetypes can effectively use this card?</p>
+                <ul class="list-disc list-inside space-y-2 text-gray-700">
+                    <li><strong>1:</strong> Extremely narrow use (e.g., only fits in a specific tribal deck like Hippogriff Tribal).</li>
+                    <li><strong>3:</strong> Moderate versatility (e.g., effective in most aggressive decks but not slower decks).</li>
+                    <li><strong>5:</strong> Highly versatile, easily included in nearly all decks able to use it (e.g., Lightning Bolt, Sol Ring).</li>
+                </ul>
+            </div>
+        </div>
+    </main>
+
+</body>
+</html>
